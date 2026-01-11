@@ -1,8 +1,11 @@
 import genesis as gs
+import numpy as np
+########################################init
 print(gs.__path__) # check if this is as expected
 gs.init(backend=gs.cpu)
 
-scene = gs.Scene(show_viewer=True)
+#######################################scene create
+scene = gs.Scene(show_viewer=True, sim_options=gs.options.SimOptions(dt = 0.01,))
 plane = scene.add_entity(gs.morphs.Plane())
 franka = scene.add_entity(
     gs.morphs.MJCF(file='xml/universal_robots_ur5e/ur5e.xml'),
