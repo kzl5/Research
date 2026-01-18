@@ -61,9 +61,9 @@ ur5e.set_dofs_force_range(
 # Hard reset
 for i in range(150):
     if i < 50:
-        ur5e.set_dofs_position(np.array([1, 1, 0, 0, 0, 0]), dofs_idx)
+        ur5e.set_dofs_position(np.array([0, 0, 0, 0, 0, 0]), dofs_idx)
     elif i < 100:
-        ur5e.set_dofs_position(np.array([-1, 0.8, 1, -2, 1, 0.5]), dofs_idx)
+        ur5e.set_dofs_position(np.array([1, 1, 1, 0, 0, 0]), dofs_idx)
     else:
         ur5e.set_dofs_position(np.array([0, 0, 0, 0, 0, 0]), dofs_idx)
     scene.step()
@@ -72,12 +72,12 @@ for i in range(150):
 for i in range(1250):
     if i == 0:
         ur5e.control_dofs_position(
-            np.array([1, 1, 0, 0, 0, 0]),
+            np.array([0, 0, 0, 0, 0, 0]),
             dofs_idx,
         )
     elif i == 250:
         ur5e.control_dofs_position(
-            np.array([-1, 0.8, 1, -2, 1, 0.5]),
+            np.array([1, 1, 1, 0, 0, 0]),
             dofs_idx,
         )
     elif i == 500:
