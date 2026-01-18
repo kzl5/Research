@@ -2,7 +2,7 @@ import genesis as gs
 import numpy as np
 ########################################init
 print(gs.__path__) # check if this is as expected
-gs.init(backend=gs.cuda)
+gs.init(backend=gs.cpu)
 
 #######################################scene create
 scene = gs.Scene(

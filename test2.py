@@ -2,7 +2,7 @@ import numpy as np
 import genesis as gs
 
 ########################## init ##########################
-gs.init(backend=gs.cuda)
+gs.init(backend=gs.cpu)
 
 ########################## create a scene ##########################
 scene = gs.Scene(
