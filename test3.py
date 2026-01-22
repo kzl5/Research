@@ -1,7 +1,7 @@
 import numpy as np
 import genesis as gs
 
-gs.init(backend=gs.cuda)
+gs.init(backend=gs.cpu)
 
 scene = gs.Scene(
     viewer_options = gs.options.ViewerOptions(
