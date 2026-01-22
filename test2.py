@@ -19,6 +19,8 @@ scene = gs.Scene(
     show_viewer = True,
 )
 
+
+
 ########################## entities ##########################
 plane = scene.add_entity(
     gs.morphs.Plane(),
@@ -28,8 +30,20 @@ ur5e = scene.add_entity(
         file  = 'xml/universal_robots_ur5e/ur5e.xml',
     ),
 )
+
+cam = scene.add_camera(
+    res    = (1280, 960),
+    pos    = (3.5, 0.0, 2.5),
+    lookat = (0, 0, 0.5),
+    fov    = 30,
+    GUI    = False
+)
+
 ########################## build ##########################
 scene.build()
+
+# start camera recording. Once this is started, all the rgb images rendered will be recorded internally
+cam.start_recording()
 
 jnt_names = [
     'shoulder_pan',
@@ -63,7 +77,7 @@ for i in range(150):
     if i < 50:
         ur5e.set_dofs_position(np.array([0, 0, 0, 0, 0, 0]), dofs_idx)
     elif i < 100:
-        ur5e.set_dofs_position(np.array([1, 1, 1, 0, 0, 0]), dofs_idx)
+        ur5e.set_dofs_position(np.array([1, 1, 1, 1, 0, 0]), dofs_idx)
     else:
         ur5e.set_dofs_position(np.array([0, 0, 0, 0, 0, 0]), dofs_idx)
     scene.step()
@@ -77,7 +91,7 @@ for i in range(1250):
         )
     elif i == 250:
         ur5e.control_dofs_position(
-            np.array([1, 1, 1, 0, 0, 0]),
+            np.array([1, 1, 1, 1, 1, 1]),
             dofs_idx,
         )
     elif i == 500:
@@ -92,7 +106,7 @@ for i in range(1250):
             dofs_idx[1:],
         )
         ur5e.control_dofs_velocity(
-            np.array([1.0, 0, 0, 0, 0, 0])[:1],
+            np.array([1.0, 1.0, 1.0, 1.0, 1.0, 1.0])[:1],
             dofs_idx[:1],
         )
     elif i == 1000:
@@ -108,3 +122,6 @@ for i in range(1250):
     print('internal force:', ur5e.get_dofs_force(dofs_idx))
 
     scene.step()
+
+    # stop recording and save video. If `filename` is not specified, a name will be auto-generated using the caller file name.
+cam.stop_recording(save_to_filename='video.mp4', fps=60)
