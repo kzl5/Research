@@ -1,5 +1,6 @@
 import numpy as np
 import genesis as gs
+import math
 
 gs.init(backend=gs.cuda)
 
@@ -54,7 +55,7 @@ ur5e.set_dofs_kp(
 )
 i = 0
 for i in range(300):
-    ur5e.set_dofs_position(np.array([i*(np.pi/180), 0, 0, 0, 0, 0]), dofs_idx)
+    ur5e.set_dofs_position(np.array([math.radians(i), 0, 0, 0, 0, 0]), dofs_idx)
     scene.step()
 
 cam.stop_recording(save_to_filename='video.mp4', fps=60)
