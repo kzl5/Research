@@ -10,7 +10,7 @@ scene = gs.Scene(
         camera_lookat = (0.0, 0.0, 0.5),
         camera_fov    = 30,
         res           = (960, 640),
-        max_FPS       = 60,
+        max_FPS       = 5,
     ),
     sim_options = gs.options.SimOptions(
         dt = 0.01,
@@ -37,8 +37,6 @@ cam = scene.add_camera(
 
 scene.build()
 
-cam.start_recording()
-
 jnt_names = [
     'shoulder_pan',
     'shoulder_lift',
@@ -49,14 +47,35 @@ jnt_names = [
 ]
 dofs_idx = [ur5e.get_joint(name).dof_idx_local for name in jnt_names]
 
-ur5e.set_dofs_kp(
-    kp = np.array([4500, 4500, 4500, 4500, 4500, 4500]),
+# ur5e.set_dofs_kp(
+#     kp = np.array([4500, 4500, 4500, 4500, 4500, 4500]),
+#     dofs_idx_local = dofs_idx,
+# )
+
+ur5e.set_dofs_force_range(
+    lower = np.array([-150, -150, -150, -150, -150, -150]),
+    upper = np.array([ 150,  150,  150,  150,  150,  150]),
     dofs_idx_local = dofs_idx,
 )
-i = 0
-for i in range(300):
-    ur5e.set_dofs_position(np.array([math.radians(i), 0, 0, 0, 0, 0]), dofs_idx)
+
+ur5e.set_dofs_kp(
+    kp = np.array([300, 300, 300, 300, 300, 300]),
+    dofs_idx_local = dofs_idx,
+)
+
+cam.start_recording()
+
+########################################
+for i in range(150):
+    j = math.sin(math.radians(i*math.pi))
+    if j == 1:
+        ur5e.set_dofs_position(np.array([0,0,0,0,0,0]), dofs_idx)
+    elif j == 0:
+        ur5e.set_dofs_position(np.array([math.radians(90),math.radians(90),0,0,0,0]), dofs_idx)
+    elif j == -1:
+        ur5e.set_dofs_position(np.array([0,0,0,0,0,0]), dofs_idx)
     scene.step()
+    cam.render()
 
 cam.stop_recording(save_to_filename='video.mp4', fps=60)
 

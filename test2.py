@@ -1,5 +1,6 @@
 import numpy as np
 import genesis as gs
+import math
 
 ########################## init ##########################
 gs.init(backend=gs.cuda)
@@ -22,9 +23,7 @@ scene = gs.Scene(
 
 
 ########################## entities ##########################
-plane = scene.add_entity(
-    gs.morphs.Plane(),
-)
+
 ur5e = scene.add_entity(
     gs.morphs.MJCF(
         file  = 'xml/universal_robots_ur5e/ur5e.xml',
@@ -43,7 +42,7 @@ cam = scene.add_camera(
 scene.build()
 
 # start camera recording. Once this is started, all the rgb images rendered will be recorded internally
-cam.start_recording()
+
 
 jnt_names = [
     'shoulder_pan',
@@ -72,31 +71,35 @@ ur5e.set_dofs_force_range(
     upper          = np.array([ 87,  87,  87,  87,  12,  12]),
     dofs_idx_local = dofs_idx,
 )
+
+cam.start_recording()
+
 # Hard reset
 for i in range(150):
     if i < 50:
         ur5e.set_dofs_position(np.array([0, 0, 0, 0, 0, 0]), dofs_idx)
     elif i < 100:
-        ur5e.set_dofs_position(np.array([1, 1, 1, 1, 0, 0]), dofs_idx)
+        ur5e.set_dofs_position(np.array([math.radians(180), math.radians(180), 0, 0, 0, 0]), dofs_idx)
     else:
         ur5e.set_dofs_position(np.array([0, 0, 0, 0, 0, 0]), dofs_idx)
     scene.step()
+    cam.render()
 
 # PD control
 for i in range(1250):
     if i == 0:
         ur5e.control_dofs_position(
-            np.array([0, 0, 0, 0, 0, 0]),
+            np.array([math.radians(90), math.radians(90), math.radians(90), 0, 0, 0]),
             dofs_idx,
         )
     elif i == 250:
         ur5e.control_dofs_position(
-            np.array([1, 1, 1, 1, 1, 1]),
+            np.array([math.radians(180), math.radians(180), math.radians(180), 0, 0, 0]),
             dofs_idx,
         )
     elif i == 500:
         ur5e.control_dofs_position(
-            np.array([0, 0, 0, 0, 0, 0]),
+            np.array([math.radians(90), math.radians(90), math.radians(90), 0, 0, 0]),
             dofs_idx,
         )
     elif i == 750:
@@ -122,6 +125,7 @@ for i in range(1250):
     print('internal force:', ur5e.get_dofs_force(dofs_idx))
 
     scene.step()
+    cam.render()
 
     # stop recording and save video. If `filename` is not specified, a name will be auto-generated using the caller file name.
 cam.stop_recording(save_to_filename='video.mp4', fps=60)
