@@ -85,47 +85,130 @@ for i in range(150):
     scene.step()
     cam.render()
 
+controlforcearr = []
+internalforcearr = []
+
 # PD control
-for i in range(1250):
+for i in range(1500):
     if i == 0:
-        ur5e.control_dofs_position(
-            np.array([math.radians(90), math.radians(90), math.radians(90), 0, 0, 0]),
+        ur5e.control_dofs_velocity(
+            np.array([math.radians(-90), math.radians(-90), math.radians(-90), 0, 0, 0]),
             dofs_idx,
         )
     elif i == 250:
-        ur5e.control_dofs_position(
-            np.array([math.radians(180), math.radians(180), math.radians(180), 0, 0, 0]),
+        ur5e.control_dofs_velocity(
+            np.array([math.radians(-180), math.radians(-180), math.radians(-90), 0, 0, 0]),
             dofs_idx,
         )
     elif i == 500:
-        ur5e.control_dofs_position(
-            np.array([math.radians(90), math.radians(90), math.radians(90), 0, 0, 0]),
+        ur5e.control_dofs_velocity(
+            np.array([math.radians(-90), math.radians(-90), math.radians(-45), 0, 0, 0]),
             dofs_idx,
         )
     elif i == 750:
         # control first dof with velocity, and the rest with position
-        ur5e.control_dofs_position(
-            np.array([0, 0, 0, 0, 0, 0])[1:],
-            dofs_idx[1:],
-        )
         ur5e.control_dofs_velocity(
-            np.array([1.0, 1.0, 1.0, 1.0, 1.0, 1.0])[:1],
-            dofs_idx[:1],
+            np.array([0, 0, 0, 0, 0, 0]),
+            dofs_idx,
         )
     elif i == 1000:
+        ur5e.control_dofs_velocity(
+            np.array([math.radians(-90), math.radians(-90), math.radians(-45), 0, 0, 0]), 
+            dofs_idx)
+    elif i == 1250:
         ur5e.control_dofs_force(
-            np.array([0, 0, 0, 0, 0, 0]),
+            np.array([math.radians(90), math.radians(90), math.radians(90), 0, 0, 0]),
             dofs_idx,
         )
     # This is the control force computed based on the given control command
     # If using force control, it's the same as the given control command
-    print('control force:', ur5e.get_dofs_control_force(dofs_idx))
+    ctrl_raw = ur5e.get_dofs_control_force(dofs_idx)
+    try:
+        # handle PyTorch tensors (possibly on CUDA)
+        import torch
+        if isinstance(ctrl_raw, torch.Tensor):
+            ctrl = ctrl_raw.detach().cpu().numpy()
+        else:
+            ctrl = np.asarray(ctrl_raw)
+    except Exception:
+        # non-torch objects -> try numpy conversion
+        ctrl = np.asarray(ctrl_raw)
+    print('control force:', ctrl)
+    controlforcearr.append(ctrl)
+
 
     # This is the actual force experienced by the dof
-    print('internal force:', ur5e.get_dofs_force(dofs_idx))
+    int_raw = ur5e.get_dofs_force(dofs_idx)
+    try:
+        import torch
+        if isinstance(int_raw, torch.Tensor):
+            intr = int_raw.detach().cpu().numpy()
+        else:
+            intr = np.asarray(int_raw)
+    except Exception:
+        intr = np.asarray(int_raw)
+    print('internal force:', intr)
+    internalforcearr.append(intr)
 
     scene.step()
     cam.render()
 
     # stop recording and save video. If `filename` is not specified, a name will be auto-generated using the caller file name.
+
+# %%
+
+import matplotlib.pyplot as plt
+import matplotlib.cm as cm
+
+# Convert to arrays
+arr_ctrl = np.array(controlforcearr)
+arr_int = np.array(internalforcearr)
+
+# Color map and joint labels
+colors = cm.get_cmap('tab10')
+joint_labels = ['shoulder_pan', 'shoulder_lift', 'elbow', 'wrist_1', 'wrist_2', 'wrist_3']
+
+# Control forces (one line per joint)
+plt.figure(figsize=(10, 5))
+if arr_ctrl.ndim == 2:
+    T, J = arr_ctrl.shape
+    for j in range(J):
+        plt.plot(range(T), arr_ctrl[:, j], color=colors(j % 10), label=joint_labels[j])
+else:
+    plt.plot(range(len(arr_ctrl)), arr_ctrl, color='blue', label='Control')
+plt.xlabel('Time Step')
+plt.ylabel('Control Force')
+plt.title('Control Force vs. Time')
+plt.grid(True)
+plt.legend()
+plt.savefig('control_force.png')
+print('Saved control plot to control_force.png')
+
+# Internal forces (one line per joint)
+plt.figure(figsize=(10, 5))
+if arr_int.ndim == 2:
+    T, J = arr_int.shape
+    for j in range(J):
+        plt.plot(range(T), arr_int[:, j], color=colors(j % 10), label=joint_labels[j])
+else:
+    plt.plot(range(len(arr_int)), arr_int, color='orange', label='Internal')
+plt.xlabel('Time Step')
+plt.ylabel('Internal Force')
+plt.title('Internal Force vs. Time')
+plt.grid(True)
+plt.legend()
+plt.savefig('internal_force.png')
+print('Saved internal plot to internal_force.png')
+
+# Show and block so windows remain until you close them
+try:
+    plt.show(block=True)
+except TypeError:
+    plt.show()
+
+try:
+    input('Press Enter to close plots and finish...')
+except Exception:
+    pass
+
 cam.stop_recording(save_to_filename='video.mp4', fps=60)
