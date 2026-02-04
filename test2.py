@@ -91,33 +91,32 @@ internalforcearr = []
 # PD control
 for i in range(1500):
     if i == 0:
-        ur5e.control_dofs_velocity(
-            np.array([math.radians(-90), math.radians(-90), math.radians(-90), 0, 0, 0]),
+        ur5e.control_dofs_position(
+            np.array([math.radians(0), math.radians(0), math.radians(0), 0, 0, 0]),
             dofs_idx,
         )
     elif i == 250:
-        ur5e.control_dofs_velocity(
-            np.array([math.radians(-180), math.radians(-180), math.radians(-90), 0, 0, 0]),
+        ur5e.control_dofs_position(
+            np.array([math.radians(-180), math.radians(-45), math.radians(-45), 0, 0, 0]),
             dofs_idx,
         )
     elif i == 500:
-        ur5e.control_dofs_velocity(
-            np.array([math.radians(-90), math.radians(-90), math.radians(-45), 0, 0, 0]),
+        ur5e.control_dofs_position(
+            np.array([math.radians(-90), math.radians(-45), math.radians(-45), 0, 0, 0]),
             dofs_idx,
         )
     elif i == 750:
-        # control first dof with velocity, and the rest with position
-        ur5e.control_dofs_velocity(
+        ur5e.control_dofs_position(
             np.array([0, 0, 0, 0, 0, 0]),
             dofs_idx,
         )
     elif i == 1000:
-        ur5e.control_dofs_velocity(
-            np.array([math.radians(-90), math.radians(-90), math.radians(-45), 0, 0, 0]), 
+        ur5e.control_dofs_position(
+            np.array([math.radians(-90), math.radians(-45), math.radians(-45), 0, 0, 0]), 
             dofs_idx)
     elif i == 1250:
         ur5e.control_dofs_force(
-            np.array([math.radians(90), math.radians(90), math.radians(90), 0, 0, 0]),
+            np.array([math.radians(90), math.radians(45), math.radians(45), 0, 0, 0]),
             dofs_idx,
         )
     # This is the control force computed based on the given control command
@@ -177,13 +176,12 @@ if arr_ctrl.ndim == 2:
 else:
     plt.plot(range(len(arr_ctrl)), arr_ctrl, color='blue', label='Control')
 plt.xlabel('Time Step')
-plt.ylabel('Control Force')
-plt.title('Control Force vs. Time')
+plt.ylabel('Control Torque')
+plt.title('Control Torque vs. Time')
 plt.grid(True)
 plt.legend()
-plt.savefig('control_force.png')
-print('Saved control plot to control_force.png')
-
+plt.savefig('control_torque.png')
+print('Saved control plot to control_torque.png')
 # Internal forces (one line per joint)
 plt.figure(figsize=(10, 5))
 if arr_int.ndim == 2:
@@ -193,12 +191,12 @@ if arr_int.ndim == 2:
 else:
     plt.plot(range(len(arr_int)), arr_int, color='orange', label='Internal')
 plt.xlabel('Time Step')
-plt.ylabel('Internal Force')
-plt.title('Internal Force vs. Time')
+plt.ylabel('Internal Torque')
+plt.title('Internal Torque vs. Time')
 plt.grid(True)
 plt.legend()
-plt.savefig('internal_force.png')
-print('Saved internal plot to internal_force.png')
+plt.savefig('internal_torque.png')
+print('Saved internal plot to internal_torque.png')
 
 # Show and block so windows remain until you close them
 try:
