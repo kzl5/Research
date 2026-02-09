@@ -18,21 +18,11 @@ scene = gs.Scene(
     show_viewer = True,
 )
 
-# plane = scene.add_entity(
-#     gs.morphs.Plane(),
-# )
+
 ur5e = scene.add_entity(
     gs.morphs.MJCF(
         file  = 'xml/universal_robots_ur5e/ur5e.xml',
     ),
-)
-
-cam = scene.add_camera(
-    res    = (1280, 960),
-    pos    = (3.5, 0.0, 2.5),
-    lookat = (0, 0, 0.5),
-    fov    = 30,
-    GUI    = False
 )
 
 scene.build()
@@ -47,40 +37,50 @@ jnt_names = [
 ]
 dofs_idx = [ur5e.get_joint(name).dof_idx_local for name in jnt_names]
 
-# ur5e.set_dofs_kp(
-#     kp = np.array([4500, 4500, 4500, 4500, 4500, 4500]),
-#     dofs_idx_local = dofs_idx,
-# )
-
-ur5e.set_dofs_force_range(
-    lower = np.array([-150, -150, -150, -150, -150, -150]),
-    upper = np.array([ 150,  150,  150,  150,  150,  150]),
-    dofs_idx_local = dofs_idx,
-)
 
 ur5e.set_dofs_kp(
-    kp = np.array([300, 300, 300, 300, 300, 300]),
+    kp = np.array([4500, 4500, 4500, 4500, 4500, 4500]),
     dofs_idx_local = dofs_idx,
 )
+i = 0
+j = 0
+k = 0
 
-cam.start_recording()
-
+controlforcearr = []
+internalforcearr = []
 ########################################
-for i in range(150):
-    j = math.sin(math.radians(i*math.pi))
-    if j == 1:
-        ur5e.set_dofs_position(np.array([0,0,0,0,0,0]), dofs_idx)
-    elif j == 0:
-        ur5e.set_dofs_position(np.array([math.radians(90),math.radians(90),0,0,0,0]), dofs_idx)
-    elif j == -1:
-        ur5e.set_dofs_position(np.array([0,0,0,0,0,0]), dofs_idx)
+while i * j * k < 360 * 180 * 160:
+    ur5e.set_dofs_position(np.array([math.radians(0), math.radians(0), math.radians(0), 0, 0, 0]), dofs_idx)
+    for i in range(360):
+        for j in range(180):
+            for k in range(160):
+                ur5e.set_dofs_position(np.array([math.radians(i), math.radians(j), math.radians(k), 0, 0, 0]), dofs_idx)
+
+    ctrl_raw = ur5e.get_dofs_control_force(dofs_idx)
+    try:
+        # handle PyTorch tensors (possibly on CUDA)
+        import torch
+        if isinstance(ctrl_raw, torch.Tensor):
+            ctrl = ctrl_raw.detach().cpu().numpy()
+        else:
+            ctrl = np.asarray(ctrl_raw)
+    except Exception:
+        # non-torch objects -> try numpy conversion
+        ctrl = np.asarray(ctrl_raw)
+    print('control force:', ctrl)
+    controlforcearr.append(ctrl)
+
+
+    # This is the actual force experienced by the dof
+    int_raw = ur5e.get_dofs_force(dofs_idx)
+    try:
+        import torch
+        if isinstance(int_raw, torch.Tensor):
+            intr = int_raw.detach().cpu().numpy()
+        else:
+            intr = np.asarray(int_raw)
+    except Exception:
+        intr = np.asarray(int_raw)
+    print('internal force:', intr)
+    internalforcearr.append(intr)
     scene.step()
-    cam.render()
-
-cam.stop_recording(save_to_filename='video.mp4', fps=60)
-
-# TO DO:
-# 1: ADD FORCE CONTROL GAINS TO THIS SCRIPT
-# 2: MODIFY FOR LOOP TO GENERATE ALL POSSIBLE POSITIONS OF THE ROBOT FROM ZERO POSITION
-# 3: RUN VISUALIZATION FOR FORCE DATA PER JOINT
-# 4: WRITE UP FOR BAI OBTAIN FEEDBACK ASAP

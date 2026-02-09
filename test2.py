@@ -60,17 +60,6 @@ ur5e.set_dofs_kp(
     kp             = np.array([4500, 4500, 3500, 3500, 2000, 2000]),
     dofs_idx_local = dofs_idx,
 )
-# set velocity gains
-ur5e.set_dofs_kv(
-    kv             = np.array([450, 450, 350, 350, 200, 200]),
-    dofs_idx_local = dofs_idx,
-)
-# set force range for safety
-ur5e.set_dofs_force_range(
-    lower          = np.array([-87, -87, -87, -87, -12, -12]),
-    upper          = np.array([ 87,  87,  87,  87,  12,  12]),
-    dofs_idx_local = dofs_idx,
-)
 
 cam.start_recording()
 
