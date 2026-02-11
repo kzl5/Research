@@ -1,5 +1,7 @@
 import numpy as np
 import genesis as gs
+import math
+import matplotlib.pyplot as plt
 
 gs.init(backend=gs.cpu)
 
@@ -17,9 +19,6 @@ scene = gs.Scene(
     show_viewer = True,
 )
 
-# plane = scene.add_entity(
-#     gs.morphs.Plane(),
-# )
 ur5e = scene.add_entity(
     gs.morphs.MJCF(
         file  = 'xml/universal_robots_ur5e/ur5e.xml',
@@ -52,9 +51,29 @@ ur5e.set_dofs_kp(
     kp = np.array([4500, 4500, 4500, 4500, 4500, 4500]),
     dofs_idx_local = dofs_idx,
 )
-i = 0
-for i in range(300):
-    ur5e.set_dofs_position(np.array([i*(np.pi/180), 0, 0, 0, 0, 0]), dofs_idx)
+
+controlforcearr = np.array([])
+dofforcearr = np.array([])
+
+for i in range(360):
+    ur5e.set_dofs_position(np.array([math.radians(i), math.radians(i), math.radians(i), 0, 0, 0]), dofs_idx)
+
+    print('control force: ', ur5e.get_dofs_control_force(dofs_idx))
+    print('dof force: ', ur5e.get_dofs_force(dofs_idx))
+
+    controlforcearr = np.append(controlforcearr, ur5e.get_dofs_control_force(dofs_idx))
+    dofforcearr = np.append(dofforcearr, ur5e.get_dofs_force(dofs_idx))
+
     scene.step()
 
 cam.stop_recording(save_to_filename='video.mp4', fps=60)
+
+# %% 
+
+timearr = np.array(range(0, 360))
+plt.figure()
+plt.plot(controlforcearr, label='Control Force')
+
+
+
+# %%
