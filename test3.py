@@ -25,6 +25,8 @@ ur5e = scene.add_entity(
     ),
 )
 
+plane = scene.add_entity(gs.morphs.Plane())
+
 scene.build()
 
 jnt_names = [

@@ -60,6 +60,7 @@ target_positions = [
     [0.5, 0, 0.5],  # return to start
 ]
 
+
 cam.start_recording()
 
 # Execute paths to each target
@@ -67,11 +68,13 @@ for target_pos in target_positions:
     qpos = ur5e.inverse_kinematics(
         link = end_effector,
         pos = target_pos,
+
     )
     
     path = ur5e.plan_path(
         qpos_goal     = qpos,
         num_waypoints = 200, # 2s duration
+        quat = [0, 1, 0, 0]
     )
     
     # execute the planned path

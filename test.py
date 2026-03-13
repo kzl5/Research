@@ -17,7 +17,7 @@ scene = gs.Scene(
 plane = scene.add_entity(gs.morphs.Plane())
 franka = scene.add_entity(
     gs.morphs.MJCF(
-        file='xml/universal_robots_ur5e/ur5e.xml',
+        file='xml/TASPRO/TASPRO.xml',
         pos = (0,0,0),
         euler = (0,0,0),
         scale = 1.0
