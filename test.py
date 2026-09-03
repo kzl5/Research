@@ -24,7 +24,11 @@ franka = scene.add_entity(
         )
 )
 
+
+
 scene.build()
+
+
 
 while True:
     scene.step()
