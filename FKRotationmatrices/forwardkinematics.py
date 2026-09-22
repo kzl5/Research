@@ -1,4 +1,5 @@
 from sympy import *
+import math
 
 #### MOBILE BASE ######
 
@@ -32,12 +33,12 @@ d1, d2, d3, d4, d5, d6 = symbols('d1 d2 d3 d4 d5 d6')
 alpha1, alpha2, alpha3, alpha4, alpha5, alpha6 = symbols('alpha1 alpha2 alpha3 alpha4 alpha5 alpha6')
 
 #DH Parameters for UR5e Robotic Arm
-q1 = 0; a1 = 0; d1 = 0.1625; alpha1 = pi/2
-q2 = 0; a2 = -0.425; d2 = 0; alpha2 = 0
-q3 = 0; a3 = -0.39225; d3 = 0; alpha3 = 0
-q4 = 0; a4 = 0; d4 = 0.13625; alpha4 = pi/2
-q5 = 0; a5 = 0; d5 = 0.13625; alpha5 = -pi/2
-q6 = 0; a6 = 0; d6 = 0.1075; alpha6 = 0
+q1 = math.radians(40);   a1 = 0;       d1 = 0.1625; alpha1 = pi/2
+q2 = math.radians(-60);  a2 = -0.425;  d2 = 0;      alpha2 = 0
+q3 = math.radians(-60);  a3 = -0.3922; d3 = 0;      alpha3 = 0
+q4 = math.radians(80);   a4 = 0;       d4 = 0.1333; alpha4 = pi/2
+q5 = math.radians(40);   a5 = 0;       d5 = 0.0997; alpha5 = -pi/2
+q6 = math.radians(40);   a6 = 0;       d6 = 0.0996; alpha6 = 0
 
 #DH Parameter list
 dh_params = [
@@ -65,3 +66,43 @@ T45 = dh_transformation_matrix(*dh_params[4])
 T56 = dh_transformation_matrix(*dh_params[5])
 
 Tbaseto6 = Mobile_Base_RM * Mobile_Base_to_UR5e_RM * T01 * T12 * T23 * T34 * T45 * T56
+
+T0to6 = T01 * T12 * T23 * T34 * T45 * T56
+
+
+def ur5e_fk(q1, q2, q3, q4, q5, q6):
+    """
+    Return the 4x4 homogeneous transform T0to6 for a UR5e arm.
+
+    Parameters
+    ----------
+    q1, q2, q3, q4, q5, q6 : float
+        Joint angles in radians.
+
+    Returns
+    -------
+    sympy.Matrix
+        4x4 transformation matrix from base frame to tool frame.
+    """
+    a = [0, -0.425, -0.3922, 0, 0, 0]
+    d = [0.1625, 0, 0, 0.1333, 0.0997, 0.0996]
+    alpha = [pi/2, 0, 0, pi/2, -pi/2, 0]
+    q = [q1, q2, q3, q4, q5, q6]
+
+    T = Matrix([[1, 0, 0, 0],
+                [0, 1, 0, 0],
+                [0, 0, 1, 0],
+                [0, 0, 0, 1]])
+
+    for qi, ai, di, alphai in zip(q, a, d, alpha):
+        T = T * dh_transformation_matrix(qi, ai, di, alphai)
+
+    return T
+
+
+# Example usage:
+T_1 = ur5e_fk(math.radians(40), math.radians(-60), math.radians(-60), math.radians(80), math.radians(40), math.radians(40))
+print(T_1)
+
+T_2 = ur5e_fk(math.radians(-40), math.radians(-40), math.radians(-80), math.radians(-80), math.radians(40), math.radians(40))
+print(T_2)
