@@ -71,19 +71,6 @@ T0to6 = T01 * T12 * T23 * T34 * T45 * T56
 
 
 def ur5e_fk(q1, q2, q3, q4, q5, q6):
-    """
-    Return the 4x4 homogeneous transform T0to6 for a UR5e arm.
-
-    Parameters
-    ----------
-    q1, q2, q3, q4, q5, q6 : float
-        Joint angles in radians.
-
-    Returns
-    -------
-    sympy.Matrix
-        4x4 transformation matrix from base frame to tool frame.
-    """
     a = [0, -0.425, -0.3922, 0, 0, 0]
     d = [0.1625, 0, 0, 0.1333, 0.0997, 0.0996]
     alpha = [pi/2, 0, 0, pi/2, -pi/2, 0]
@@ -99,10 +86,159 @@ def ur5e_fk(q1, q2, q3, q4, q5, q6):
 
     return T
 
+def rotation_vector_from_transform(T):
+
+    R = T[:3, :3]
+
+    r00 = float(R[0, 0])
+    r01 = float(R[0, 1])
+    r02 = float(R[0, 2])
+
+    r10 = float(R[1, 0])
+    r11 = float(R[1, 1])
+    r12 = float(R[1, 2])
+
+    r20 = float(R[2, 0])
+    r21 = float(R[2, 1])
+    r22 = float(R[2, 2])
+
+    # Total rotation angle
+    cos_theta = (r00 + r11 + r22 - 1.0) / 2.0
+
+    # Clamp for floating-point safety
+    cos_theta = max(-1.0, min(1.0, cos_theta))
+
+    theta = math.acos(cos_theta)
+
+    # No rotation
+    if abs(theta) < 1e-10:
+        return 0.0, 0.0, 0.0
+
+    # Special case near 180 degrees
+    if abs(math.pi - theta) < 1e-6:
+        kx = math.sqrt(max(0.0, (r00 + 1.0) / 2.0))
+        ky = math.sqrt(max(0.0, (r11 + 1.0) / 2.0))
+        kz = math.sqrt(max(0.0, (r22 + 1.0) / 2.0))
+
+        if r21 - r12 < 0:
+            kx = -kx
+        if r02 - r20 < 0:
+            ky = -ky
+        if r10 - r01 < 0:
+            kz = -kz
+
+        return theta * kx, theta * ky, theta * kz
+
+    # General case
+    scale = theta / (2.0 * math.sin(theta))
+
+    Rx = scale * (r21 - r12)
+    Ry = scale * (r02 - r20)
+    Rz = scale * (r10 - r01)
+
+    return Rx, Ry, Rz
+
 
 # Example usage:
+print("Forward Kinematics and Rotation Vector Calculation for UR5e Robotic Arm\n")
 T_1 = ur5e_fk(math.radians(40), math.radians(-60), math.radians(-60), math.radians(80), math.radians(40), math.radians(40))
 print(T_1)
+R_1 = rotation_vector_from_transform(T_1)
+print("Rotation vector components (Rx, Ry, Rz):", R_1)
 
+print("\n")
 T_2 = ur5e_fk(math.radians(-40), math.radians(-40), math.radians(-80), math.radians(-80), math.radians(40), math.radians(40))
 print(T_2)
+R_2 = rotation_vector_from_transform(T_2)
+print("Rotation vector components (Rx, Ry, Rz):", R_2)
+
+print("\n")
+T_3 = ur5e_fk(math.radians(0), math.radians(-90), math.radians(0), math.radians(-90), math.radians(0), math.radians(0))
+print(T_3)
+R_3 = rotation_vector_from_transform(T_3)
+print("Rotation vector components (Rx, Ry, Rz):", R_3)
+
+### UR5e PolyScope values:
+poses = [
+    {
+        "name": "Run 4060",
+        "joints": tuple(math.radians(angle) for angle in (40, -60, -60, 80, 40, 40)),
+        "measured": [35.37, -243.99, 836.31, 1.145, -0.004, 0.225],
+    },
+    {
+        "name": "Run 4040",
+        "joints": tuple(math.radians(angle) for angle in (-40, -40, -80, -80, 40, 40)),
+        "measured": [-162.11, -137.34, 848.84, 0.516, 2.217, -1.793],
+    },
+    {
+        "name": "Run 0090",
+        "joints": tuple(math.radians(angle) for angle in (0, -90, 0, -90, 0, 0)),
+        "measured": [-1.06, -233.66, 1080.30, 0.005, 2.224, -2.224],
+    }
+]
+
+
+def calculate_pose_errors(poses):
+    errors = []
+
+    for pose in poses:
+        transform = ur5e_fk(*pose["joints"])
+        predicted_position = [float(value) * 1000.0 for value in transform[:3, 3]]
+        predicted_rotation = rotation_vector_from_transform(transform)
+        measured = pose["measured"]
+        errors.append([
+            predicted - expected
+            for predicted, expected in zip(
+                predicted_position + list(predicted_rotation), measured
+            )
+        ])
+
+    return errors
+
+
+pose_errors = calculate_pose_errors(poses)
+print("\nPose error values (x, y, z in mm; Rx, Ry, Rz in rad):")
+for pose, errors in zip(poses, pose_errors):
+    formatted_errors = ", ".join(f"{error:.12f}" for error in errors)
+    print(f"{pose['name']}: {formatted_errors}")
+
+#### graphing #####
+
+import matplotlib.pyplot as plt
+
+
+def plot_pose_errors(poses):
+    labels = []
+    labels = [pose["name"] for pose in poses]
+
+    components = ["x", "y", "z", "Rx", "Ry", "Rz"]
+    units = ["mm", "mm", "mm", "rad", "rad", "rad"]
+    figure, axis = plt.subplots(figsize=(10, 6))
+
+    for index, (component, unit) in enumerate(zip(components, units)):
+        errors = [pose_error[index] for pose_error in pose_errors]
+        axis.plot(labels, errors, marker="o", label=f"{component} ({unit})")
+        for label, error in zip(labels, errors):
+            axis.annotate(
+                f"{error:.9f}",
+                (label, error),
+                textcoords="offset points",
+                xytext=(0, 6),
+                ha="center",
+                fontsize=8,
+            )
+
+    axis.axhline(0.0, color="black", linewidth=0.8)
+    axis.set_title("Forward-kinematics error across poses")
+    axis.set_xlabel("Pose")
+    axis.set_ylabel("Signed error (mm for position, rad for rotation)")
+    axis.grid(True)
+    axis.legend()
+
+    figure.tight_layout()
+    return figure, pose_errors
+
+figure, errors = plot_pose_errors(poses)
+plt.show()
+
+
