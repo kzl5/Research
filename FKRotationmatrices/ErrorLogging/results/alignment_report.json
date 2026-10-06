@@ -1,0 +1,363 @@
+{
+  "model": "p_U = R_UV p_V + t_effective; R_TCP = R_UV R_marker C_marker_TCP",
+  "limitations": [
+    "t_effective combines frame-origin offset and nominal centroid/TCP offset.",
+    "Physical centroid/TCP lever arm and frame translation cannot be separated reliably with constant orientation.",
+    "Orientation mounting bias is fitted on one loop; angle errors measure residual disagreement, not absolute calibration accuracy.",
+    "Repeated-loop index is ambiguous without external synchronization.",
+    "Time offset is fitted on one loop; no speed scaling or time warping.",
+    "VICON rotations assumed helical rotation vectors as in default Tracker CSV export."
+  ],
+  "effective_vicon_to_ur_matrix": [
+    [
+      -0.9996090164261499,
+      -0.004286853675537617,
+      0.027630366720534545,
+      -0.21191652048538054
+    ],
+    [
+      0.003931852607814706,
+      -0.9999091930548833,
+      -0.012889770339419102,
+      -0.6559788744781958
+    ],
+    [
+      0.02768311425069595,
+      -0.012776092121500379,
+      0.9995351002618599,
+      0.14197864740627764
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      1.0
+    ]
+  ],
+  "marker_to_tcp_orientation_zero_translation_gauge": [
+    [
+      -0.8867003477001008,
+      0.4612789692745254,
+      -0.031372055934413355,
+      0.0
+    ],
+    [
+      -0.46204370455266275,
+      -0.8865285316347025,
+      0.024140788737528618,
+      0.0
+    ],
+    [
+      -0.016676584535575956,
+      0.035900906710690995,
+      0.999216201042386,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      1.0
+    ]
+  ],
+  "ur_common_start_s": 7.464375058745067,
+  "vicon_common_start_s": 12.68999999999973,
+  "ur_phase_refinement_s": 0.02043942603937865,
+  "calibration_loop_s": 12.909570055007798,
+  "detected_ur_period_s": 12.90914011001587,
+  "detected_vicon_period_s": 12.909999999999727,
+  "overlap_s": 51.63828022003119,
+  "comparison_dt_s": 0.01,
+  "available_overlap_s": 56.880000000000265,
+  "excluded_final_partial_loop_s": 5.241719779969074,
+  "rotation_det": 1.000000000000001,
+  "kabsch_singular_values": [
+    5.5927490252946495,
+    1.3946383850066446,
+    0.6788929165135743
+  ],
+  "start_position_disagreement_mm": 2.1752640507936305,
+  "ur_valid_samples": 12446,
+  "vicon_valid_samples": 6958,
+  "ur_removed_rows": 0,
+  "vicon_removed_rows": 0,
+  "all": {
+    "samples": 5165,
+    "position_rmse_mm": 2.1581751002695784,
+    "position_median_mm": 1.8203111986893534,
+    "position_p95_mm": 3.7565947281247474,
+    "position_max_mm": 5.62855619185351,
+    "principal_angle_rms_rad": 0.014595087964388787,
+    "principal_angle_p95_rad": 0.0221638883737663,
+    "principal_angle_max_rad": 0.030910627752629618
+  },
+  "calibration": {
+    "samples": 1291,
+    "position_rmse_mm": 2.205468312454566,
+    "position_median_mm": 1.894225933137688,
+    "position_p95_mm": 3.7402246388032925,
+    "position_max_mm": 5.62855619185351,
+    "principal_angle_rms_rad": 0.014126353838242586,
+    "principal_angle_p95_rad": 0.021882796565798612,
+    "principal_angle_max_rad": 0.02326740879335471
+  },
+  "holdout": {
+    "samples": 3874,
+    "position_rmse_mm": 2.1421828312229336,
+    "position_median_mm": 1.7968877150553753,
+    "position_p95_mm": 3.7601557918551083,
+    "position_max_mm": 5.594543360298165,
+    "principal_angle_rms_rad": 0.014747983171071665,
+    "principal_angle_p95_rad": 0.022301108053817353,
+    "principal_angle_max_rad": 0.030910627752629618
+  },
+  "complete_loop_count": 4,
+  "holdout_complete_loops": {
+    "samples": 3874,
+    "position_rmse_mm": 2.1421828312229336,
+    "position_median_mm": 1.7968877150553753,
+    "position_p95_mm": 3.7601557918551083,
+    "position_max_mm": 5.594543360298165,
+    "principal_angle_rms_rad": 0.014747983171071665,
+    "principal_angle_p95_rad": 0.022301108053817353,
+    "principal_angle_max_rad": 0.030910627752629618
+  },
+  "alignment_refitted": false,
+  "signed_error_convention": "compared minus reference, expressed in UR-base axes",
+  "fk_model": "Standard DH dimensions and order from forwardkinematics1.py; actual_q1_rad..actual_q6_rad; zero flange-to-TCP offset; no mobile-base transform",
+  "comparisons": {
+    "ur_vs_vicon": {
+      "all": {
+        "samples": 5165,
+        "position_rmse_mm": 2.1581751002695784,
+        "position_median_mm": 1.8203111986893534,
+        "position_p95_mm": 3.7565947281247474,
+        "position_max_mm": 5.62855619185351,
+        "principal_angle_rms_rad": 0.014595087964388787,
+        "principal_angle_p95_rad": 0.0221638883737663,
+        "principal_angle_max_rad": 0.030910627752629618,
+        "xyz_bias_mm": [
+          0.1237660466123258,
+          0.05876541042846213,
+          0.038108877830384844
+        ],
+        "xyz_rmse_mm": [
+          1.9722132356558837,
+          0.7031890405278952,
+          0.5230868855255462
+        ],
+        "xyz_max_abs_mm": [
+          5.212805975485068,
+          2.1207528124740085,
+          1.6576225214770535
+        ]
+      },
+      "calibration": {
+        "samples": 1291,
+        "position_rmse_mm": 2.205468312454566,
+        "position_median_mm": 1.894225933137688,
+        "position_p95_mm": 3.7402246388032925,
+        "position_max_mm": 5.62855619185351,
+        "principal_angle_rms_rad": 0.014126353838242586,
+        "principal_angle_p95_rad": 0.021882796565798612,
+        "principal_angle_max_rad": 0.02326740879335471,
+        "xyz_bias_mm": [
+          -0.005412330406365883,
+          -0.0014005291785819157,
+          -0.0005605891618376305
+        ],
+        "xyz_rmse_mm": [
+          2.025674909387739,
+          0.7293223542642407,
+          0.478351902148026
+        ],
+        "xyz_max_abs_mm": [
+          5.208656741219397,
+          2.110767736197103,
+          1.6576225214770535
+        ]
+      },
+      "holdout": {
+        "samples": 3874,
+        "position_rmse_mm": 2.1421828312229336,
+        "position_median_mm": 1.7968877150553753,
+        "position_p95_mm": 3.7601557918551083,
+        "position_max_mm": 5.594543360298165,
+        "principal_angle_rms_rad": 0.014747983171071665,
+        "principal_angle_p95_rad": 0.022301108053817353,
+        "principal_angle_max_rad": 0.030910627752629618,
+        "xyz_bias_mm": [
+          0.1668143906317194,
+          0.07881554673013841,
+          0.05099537289671401
+        ],
+        "xyz_rmse_mm": [
+          1.954072373310611,
+          0.6942616879129612,
+          0.5371677121223877
+        ],
+        "xyz_max_abs_mm": [
+          5.212805975485068,
+          2.1207528124740085,
+          1.6447638972273415
+        ]
+      }
+    },
+    "fk_vs_vicon": {
+      "all": {
+        "samples": 5165,
+        "position_rmse_mm": 2.1906049337898947,
+        "position_median_mm": 1.8328113914342725,
+        "position_p95_mm": 3.7303865555965987,
+        "position_max_mm": 5.578654833995744,
+        "principal_angle_rms_rad": 0.01555624199342943,
+        "principal_angle_p95_rad": 0.02134233065826262,
+        "principal_angle_max_rad": 0.030255438066061,
+        "xyz_bias_mm": [
+          0.31159838647497573,
+          -0.5255364464442032,
+          -0.030474759039492014
+        ],
+        "xyz_rmse_mm": [
+          1.9224208649885444,
+          0.8588132887596784,
+          0.6045558111962228
+        ],
+        "xyz_max_abs_mm": [
+          5.182932522023121,
+          2.6476568458132927,
+          1.9350326830310793
+        ]
+      },
+      "calibration": {
+        "samples": 1291,
+        "position_rmse_mm": 2.2390363331590084,
+        "position_median_mm": 1.921896861405426,
+        "position_p95_mm": 3.7270481082978875,
+        "position_max_mm": 5.578654833995744,
+        "principal_angle_rms_rad": 0.015185643818460343,
+        "principal_angle_p95_rad": 0.020997320213718036,
+        "principal_angle_max_rad": 0.022447277208302262,
+        "xyz_bias_mm": [
+          0.18245529932625776,
+          -0.5856961448527643,
+          -0.06921280246933932
+        ],
+        "xyz_rmse_mm": [
+          1.9658176859406598,
+          0.9202633601051935,
+          0.5495087577982223
+        ],
+        "xyz_max_abs_mm": [
+          5.170182244011001,
+          2.638417780047017,
+          1.9350326830310793
+        ]
+      },
+      "holdout": {
+        "samples": 3874,
+        "position_rmse_mm": 2.1742256537600864,
+        "position_median_mm": 1.8004147433692603,
+        "position_p95_mm": 3.732648380938652,
+        "position_max_mm": 5.56392747230714,
+        "principal_angle_rms_rad": 0.015677796834936784,
+        "principal_angle_p95_rad": 0.02144917531266861,
+        "principal_angle_max_rad": 0.030255438066061,
+        "xyz_bias_mm": [
+          0.3546349702408481,
+          -0.5054883900050042,
+          -0.017565411061192356
+        ],
+        "xyz_rmse_mm": [
+          1.907739701893166,
+          0.8373339890940323,
+          0.6218184735088907
+        ],
+        "xyz_max_abs_mm": [
+          5.182932522023121,
+          2.6476568458132927,
+          1.9216860809041503
+        ]
+      }
+    },
+    "fk_vs_ur": {
+      "all": {
+        "samples": 5165,
+        "position_rmse_mm": 0.6725230531947867,
+        "position_median_mm": 0.6676191780463822,
+        "position_p95_mm": 0.7098976745112728,
+        "position_max_mm": 0.7231984312285187,
+        "principal_angle_rms_rad": 0.006365733916243411,
+        "principal_angle_p95_rad": 0.0068353941695394665,
+        "principal_angle_max_rad": 0.006862709576677715,
+        "xyz_bias_mm": [
+          0.18783233986264902,
+          -0.5843018568726623,
+          -0.06858363686987709
+        ],
+        "xyz_rmse_mm": [
+          0.21823275379435647,
+          0.5863020407151308,
+          0.24680283487642826
+        ],
+        "xyz_max_abs_mm": [
+          0.3765504388206775,
+          0.652870000435915,
+          0.47673697846961627
+        ]
+      },
+      "calibration": {
+        "samples": 1291,
+        "position_rmse_mm": 0.6725222026126728,
+        "position_median_mm": 0.6675989307323953,
+        "position_p95_mm": 0.709845012870379,
+        "position_max_mm": 0.7231638910973854,
+        "principal_angle_rms_rad": 0.006365633144026028,
+        "principal_angle_p95_rad": 0.006835103879627895,
+        "principal_angle_max_rad": 0.006862702413186418,
+        "xyz_bias_mm": [
+          0.18786762973262355,
+          -0.5842956156741823,
+          -0.06865221330750158
+        ],
+        "xyz_rmse_mm": [
+          0.21825358724429628,
+          0.5862960365840381,
+          0.24679635764704003
+        ],
+        "xyz_max_abs_mm": [
+          0.3765413301602405,
+          0.652870000435915,
+          0.4767096770230683
+        ]
+      },
+      "holdout": {
+        "samples": 3874,
+        "position_rmse_mm": 0.6725233366487318,
+        "position_median_mm": 0.6676216257691697,
+        "position_p95_mm": 0.7099220607068466,
+        "position_max_mm": 0.7231984312285187,
+        "principal_angle_rms_rad": 0.006365767497957336,
+        "principal_angle_p95_rad": 0.006835327271276318,
+        "principal_angle_max_rad": 0.006862709576677715,
+        "xyz_bias_mm": [
+          0.18782057960912818,
+          -0.5843039367351439,
+          -0.06856078395790641
+        ],
+        "xyz_rmse_mm": [
+          0.218225810661792,
+          0.5863040415618861,
+          0.2468049933578027
+        ],
+        "xyz_max_abs_mm": [
+          0.3765504388206775,
+          0.6528422419316976,
+          0.47673697846961627
+        ]
+      }
+    }
+  },
+  "ur_orientation_from_start_max_rad": 0.000899278981752409,
+  "vicon_orientation_from_start_max_rad": 0.0348521471163723
+}
