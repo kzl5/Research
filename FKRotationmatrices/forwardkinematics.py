@@ -241,4 +241,146 @@ def plot_pose_errors(poses):
 figure, errors = plot_pose_errors(poses)
 plt.show()
 
+import numpy as np
 
+def orientation_error_axis_angle(rx, ry, rz, T_calc):
+    """
+    Compare a measured UR PolyScope rotation vector [Rx, Ry, Rz]
+    against the rotation contained in a calculated 4x4 transformation matrix.
+
+    Parameters
+    ----------
+    rx, ry, rz : float
+        Measured UR rotation-vector components in radians.
+
+    T_calc : array-like, shape (4, 4)
+        Calculated homogeneous transformation matrix.
+
+    Returns
+    -------
+    theta : float
+        Principal rotation angle in radians.
+
+    axis : np.ndarray, shape (3,)
+        Principal rotation axis, expressed in the base/reference frame.
+
+    R_rel : np.ndarray, shape (3, 3)
+        Relative rotation matrix taking the calculated orientation
+        into the measured orientation.
+    """
+
+    # ---------------------------------------------------------
+    # 1. Convert measured UR rotation vector to rotation matrix
+    # ---------------------------------------------------------
+
+    rotvec = np.array([rx, ry, rz], dtype=float)
+
+    theta_measured = np.linalg.norm(rotvec)
+
+    if theta_measured < 1e-12:
+        R_measured = np.eye(3)
+
+    else:
+        u = rotvec / theta_measured
+        ux, uy, uz = u
+
+        K = np.array([
+            [0.0, -uz,   uy],
+            [uz,   0.0, -ux],
+            [-uy,  ux,   0.0]
+        ])
+
+        R_measured = (
+            np.eye(3)
+            + np.sin(theta_measured) * K
+            + (1.0 - np.cos(theta_measured)) * (K @ K)
+        )
+
+    # ---------------------------------------------------------
+    # 2. Extract calculated rotation matrix
+    # ---------------------------------------------------------
+
+    T_calc = np.asarray(T_calc, dtype=float)
+    R_calc = T_calc[:3, :3]
+
+    # ---------------------------------------------------------
+    # 3. Relative rotation
+    #
+    # R_measured = R_rel @ R_calc
+    # ---------------------------------------------------------
+
+    R_rel = R_measured @ R_calc.T
+
+    # ---------------------------------------------------------
+    # 4. Principal rotation angle
+    # ---------------------------------------------------------
+
+    cos_theta = (np.trace(R_rel) - 1.0) / 2.0
+
+    # Protect against floating-point values slightly outside [-1, 1]
+    cos_theta = np.clip(cos_theta, -1.0, 1.0)
+
+    theta = np.arccos(cos_theta)
+
+    # ---------------------------------------------------------
+    # 5. Principal rotation axis
+    # ---------------------------------------------------------
+
+    if theta < 1e-10:
+        # No meaningful unique axis exists for zero rotation
+        axis = np.array([0.0, 0.0, 0.0])
+
+    elif np.pi - theta < 1e-6:
+        # Special handling near 180 degrees
+        axis = np.sqrt(
+            np.maximum(
+                (np.diag(R_rel) + 1.0) / 2.0,
+                0.0
+            )
+        )
+
+        # Recover signs from off-diagonal elements
+        if axis[0] > 1e-6:
+            axis[1] = np.copysign(
+                axis[1],
+                R_rel[0, 1] + R_rel[1, 0]
+            )
+            axis[2] = np.copysign(
+                axis[2],
+                R_rel[0, 2] + R_rel[2, 0]
+            )
+
+        elif axis[1] > 1e-6:
+            axis[2] = np.copysign(
+                axis[2],
+                R_rel[1, 2] + R_rel[2, 1]
+            )
+
+        axis /= np.linalg.norm(axis)
+
+    else:
+        axis = np.array([
+            R_rel[2, 1] - R_rel[1, 2],
+            R_rel[0, 2] - R_rel[2, 0],
+            R_rel[1, 0] - R_rel[0, 1]
+        ]) / (2.0 * np.sin(theta))
+
+        axis /= np.linalg.norm(axis)
+
+    return theta, axis, R_rel
+
+[theta_1, axis_1, R_rel_1] = orientation_error_axis_angle(1.145, -0.004, 0.225, T_1)
+print("\nOrientation error axis-angle for Run 4060:")
+print(f"Theta: {theta_1}")
+print(f"Axis: {axis_1}")
+print(f"Relative Rotation Matrix:\n{R_rel_1}")
+[theta_2, axis_2, R_rel_2] = orientation_error_axis_angle(0.516, 2.217, -1.793, T_2)
+print("\nOrientation error axis-angle for Run 4040:")
+print(f"Theta: {theta_2}")
+print(f"Axis: {axis_2}")
+print(f"Relative Rotation Matrix:\n{R_rel_2}")
+[theta_3, axis_3, R_rel_3] = orientation_error_axis_angle(0.005, 2.224, -2.224, T_3)
+print("\nOrientation error axis-angle for Run 0090:")
+print(f"Theta: {theta_3}")
+print(f"Axis: {axis_3}")
+print(f"Relative Rotation Matrix:\n{R_rel_3}")
